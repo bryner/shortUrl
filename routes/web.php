@@ -15,4 +15,5 @@ Route::get('/', function () {
 });
 */
 
-Route::resource('/','UrlsController');
+Route::get('{code}','UrlsController@show');
+Route::get('url/top100','UrlsController@top100');

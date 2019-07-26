@@ -37,20 +37,34 @@ class UrlsController extends Controller
     public function store(Request $request)
     {
         //
+        $result=array();
+        $result['error']="";
+        $result['error_code']="";
+        $result['url']="";
         if(isset($request->url) && $request->url!=""){
-            $url=urldecode($request->url);
-            if (filter_var($url, FILTER_VALIDATE_URL)) {
+            $url =urldecode($request->url);//Clean URL
+            $url =strpos($url, 'http') !== 0 ? "http://".$url : $url;//Add http if not exist
+            if ($this->validateUrlFormat($url)) {
                 $slug=$this->GetShortUrl($url);
 
-                    
-                echo url('/'.$slug);
+                $result['error']="";
+                $result['error_code']="000";
+                $result['url']=url('/'.$slug);
+                echo json_encode($result); 
 
             }else{
-                echo 'url invalida'.$url;
+                $result['error']="URL is not in a valid format.";
+                $result['error_code']="002";
+                echo json_encode($result); 
             }
         }else{
-            echo 'url no existe';
+            $result['error']="URL is required";
+            $result['error_code']="001";
+            echo json_encode($result); 
         }
+    }
+    function validateUrlFormat($url){
+        return filter_var($url, FILTER_VALIDATE_URL);
     }
     function GetShortUrl($url){
         $result = Url::where('url',$url)->get();
@@ -70,7 +84,7 @@ class UrlsController extends Controller
         }
     }
     function generateUniqueID(){
-        $short_code = substr(md5(uniqid(rand(), true)),0,6); // creates a 6 digit unique short id
+        $short_code = substr(md5(uniqid(rand(), true)),0,6); // 6 digit unique short id
         $result = Url::where('short_code',$short_code)->get();
         if (count($result) > 0) {
             $this->generateUniqueID();
@@ -90,10 +104,26 @@ class UrlsController extends Controller
         //
         $result = Url::where('short_code',$short_code)->first();
         if (isset($result->url)) {
-            $url=$result->url;
-            header("location:".$url);
+            Url::where('id_url',$result->id_url)
+                ->update([
+                    'hits'=>$result->hits+1
+                ]);
+            return redirect($result->url);
         } else {
-            echo 'url no existe';
+            echo 'URL not found';
+        }
+
+    }
+    public function top100()
+    {
+        //
+        $result = Url::orderBy('hits','desc')->limit(100)->get();
+        if (count($result)>0) {
+            foreach ($result as $key=> $row) {
+                echo ($key+1).' - '.$row->hits.' Hits - '.$row->url.'<br>';
+            }
+        } else {
+            echo 'No URL found';
         }
 
     }
