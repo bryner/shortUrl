@@ -117,10 +117,10 @@ class UrlsController extends Controller
     public function top100()
     {
         //
-        $result = Url::orderBy('hits','desc')->limit(100)->get();
+        $result = Url::select('id_url','url','hits')->orderBy('hits','desc')->limit(100)->get();
         if (count($result)>0) {
             foreach ($result as $key=> $row) {
-                echo ($key+1).' - '.$row->hits.' Hits - '.$row->url.'<br>';
+                echo $row->hits.' Times - '.$row->url.'<br>';
             }
         } else {
             echo 'No URL found';
