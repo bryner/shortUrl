@@ -32,7 +32,7 @@ Instalar composer y laravel.
 composer global require laravel/installer
 ```
 
-Crear un folder he importar el repositorio y importar la tabla de la base de datos que estan en migrations.
+Crear un folder he importar el repositorio y las tabla de la base de datos que estan en migrations.
 
 ```
 php artisan migrate
